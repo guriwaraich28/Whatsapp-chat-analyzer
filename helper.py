@@ -8,16 +8,16 @@ extract = URLExtract()
 
 def fetch_stats(selected_user,df):
 
-    if selected_user != 'Overall':
+    if selected_user !='Overall':
         df = df[df['user'] == selected_user]
-
     # fetch the number of messages
     num_messages = df.shape[0]
 
-    # fetch the total number of words
+    # fetch the totol number of words
     words = []
     for message in df['message']:
         words.extend(message.split())
+
 
     # fetch number of media messages
     num_media_messages = df[df['message'] == '<Media omitted>\n'].shape[0]
@@ -26,13 +26,14 @@ def fetch_stats(selected_user,df):
     links = []
     for message in df['message']:
         links.extend(extract.find_urls(message))
+    return num_messages, len(words),num_media_messages,len(links)
 
-    return num_messages,len(words),num_media_messages,len(links)
 
 def most_busy_users(df):
     x = df['user'].value_counts().head()
     df = round((df['user'].value_counts() / df.shape[0]) * 100, 2).reset_index().rename(
         columns={'index': 'name', 'user': 'percent'})
+
     return x,df
 
 def create_wordcloud(selected_user,df):
@@ -43,7 +44,12 @@ def create_wordcloud(selected_user,df):
     if selected_user != 'Overall':
         df = df[df['user'] == selected_user]
 
+    # remove group messages
+
     temp = df[df['user'] != 'group_notification']
+
+    # remove media omitted messages
+
     temp = temp[temp['message'] != '<Media omitted>\n']
 
     def remove_stop_words(message):
@@ -53,9 +59,9 @@ def create_wordcloud(selected_user,df):
                 y.append(word)
         return " ".join(y)
 
-    wc = WordCloud(width=500,height=500,min_font_size=10,background_color='white')
+    wc = WordCloud(width = 500, height = 500, min_font_size = 10, background_color = 'white')
     temp['message'] = temp['message'].apply(remove_stop_words)
-    df_wc = wc.generate(temp['message'].str.cat(sep=" "))
+    df_wc = wc.generate(temp['message'].str.cat(sep = " "))
     return df_wc
 
 def most_common_words(selected_user,df):
@@ -66,7 +72,12 @@ def most_common_words(selected_user,df):
     if selected_user != 'Overall':
         df = df[df['user'] == selected_user]
 
+    # remove group messages
+
     temp = df[df['user'] != 'group_notification']
+
+    # remove media omitted messages
+
     temp = temp[temp['message'] != '<Media omitted>\n']
 
     words = []
@@ -80,6 +91,7 @@ def most_common_words(selected_user,df):
     return most_common_df
 
 def emoji_helper(selected_user,df):
+
     if selected_user != 'Overall':
         df = df[df['user'] == selected_user]
 
@@ -137,16 +149,6 @@ def activity_heatmap(selected_user,df):
     user_heatmap = df.pivot_table(index='day_name', columns='period', values='message', aggfunc='count').fillna(0)
 
     return user_heatmap
-
-
-
-
-
-
-
-
-
-
 
 
 
