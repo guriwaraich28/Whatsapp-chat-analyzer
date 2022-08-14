@@ -3,7 +3,6 @@ from wordcloud import WordCloud
 import pandas as pd
 from collections import Counter
 import emoji
-from emot.emo_unicode import UNICODE_EMOJI
 import re
 
 extract = URLExtract()
