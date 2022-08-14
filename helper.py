@@ -5,6 +5,7 @@ from collections import Counter
 import emoji
 from emot.emo_unicode import UNICODE_EMOJI
 
+
 extract = URLExtract()
 
 def fetch_stats(selected_user,df):
