@@ -4,7 +4,7 @@ import pandas as pd
 from collections import Counter
 import emoji
 from emot.emo_unicode import UNICODE_EMOJI
-
+import re
 
 extract = URLExtract()
 
@@ -97,11 +97,18 @@ def emoji_helper(selected_user,df):
     if selected_user != 'Overall':
         df = df[df['user'] == selected_user]
 
-    emojis = []
-    for message in df['message']:
-        emojis.extend([c for c in message if c in emoji.UNICODE_EMOJI['en']])
+    emoji_counter = Counter()
+    emojis_list = map(lambda x: ''.join(x.split()), emoji.UNICODE_EMOJI['en'].keys())
+    r = re.compile('|'.join(re.escape(p) for p in emojis_list))
+    for index, row in df.iterrows():
+        emojis_found = r.findall(row['message'])
+        for emoji_f in emojis_found:
+            emoji_counter[emoji_f] += 1
 
-    emoji_df = pd.DataFrame(Counter(emojis).most_common(len(Counter(emojis))))
+    for item in emoji_counter.most_common(10):
+        print(f'{item[0]} - {item[1]}')
+
+    emoji_df = pd.DataFrame(Counter(emoji_counter).most_common(len(Counter(emoji_counter))))
 
     return emoji_df
 
