@@ -1,16 +1,57 @@
 import re
+import regex
 import pandas as pd
+from datetime import datetime
+from pandas.errors import EmptyDataError
 
 def preprocessor(data):
+
     pattern = '\d+/\d+/\d+, \d+:\d+\d+ [aA-zZ]* - '
 
-    messages = re.split(pattern, data)[1:]
-    dates = re.findall(pattern, data)
+    messages = re.split(pattern,data)[1:]
+    dates = re.findall(pattern,data)
 
-    df = pd.DataFrame({'user_message': messages, 'message_date': dates})
+    df = pd.DataFrame({'user_message': messages,'message_date': dates})
+
+    # SAMSUNG Export time format
+
+    try:
+        df['message_date'] = pd.to_datetime(df['message_date'], format="%Y/%m/%d, %I:%M %p - ")
+    except Exception as diag:
+        print(diag)
+
+    # IOS Export time format
+
+        try:
+            # Drop date enclosures from date column
+            df['message_date'] = df['message_date'].map(lambda x: x.lstrip('[').rstrip(']'))
+            df['message_date'] = pd.to_datetime(df['message_date'], format="%d/%m/%y, %I:%M:%S %p - ")
+        except Exception as diag:
+            print(diag)
+
+        # OppO Export time format
+            try:
+                df['message_date'] = pd.to_datetime(df['message_date'], format="%m/%d/%y, %I:%M %p - ")
+            except Exception as diag:
+                print(diag)
+
+            # Android Export time format
+                try:
+                    df['message_date'] = pd.to_datetime(df['message_date'], format="%d/%m/%Y, %I:%M %p - ")
+                except Exception as diag:
+                    print(diag)
+
+                    try:
+                        df['message_date'] = pd.to_datetime(df['message_date'], format="%d/%m/%y, %I:%M %p - ")
+                    except EmptyDataError as diag:
+                        raise diag
+
+
+
+    df['message_date'] = pd.to_datetime(df['message_date'])
+
     # convert message_date type
 
-    df['message_date'] = pd.to_datetime(df['message_date'], format='%d/%m/%Y, %I:%M %p - ')
     df.rename(columns={'message_date': 'date'}, inplace=True)
 
     # seperate users and messages
