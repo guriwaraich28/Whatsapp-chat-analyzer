@@ -3,6 +3,7 @@ import preprocessor,helper
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.backends.backend_pdf import PdfPages
+from pandas.errors import EmptyDataError
 
 # Webpage title
 TITLE = "WhatsApp Chat Analyzer"
@@ -43,10 +44,13 @@ if uploaded_file is not None:
     df = preprocessor.preprocessor(data)
 
     # fetch unique users
+    try:
+        user_list.remove('group_notification')
+    except Exception as diag:
+        print(diag)
     user_list = df['user'].unique().tolist()
-    user_list.remove('group_notification')
     user_list.sort()
-    user_list.insert(0,"Overall")
+    user_list.insert(0, "Overall")
 
     selected_user = st.selectbox("Show analysis wrt",user_list)
 
