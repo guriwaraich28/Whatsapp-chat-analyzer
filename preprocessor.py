@@ -5,15 +5,19 @@ from datetime import datetime
 from pandas.errors import EmptyDataError
 
 def preprocessor(data):
+    try:
+        data = re.sub(r"[\[\]]", '', data)
+    except Exception as diag:
+        print(diag)
 
-    pattern = '\d+/\d+/\d+, \d+:\d+\d+ [aA-zZ]* - '
+    pattern = '\d+/\d+/\d+, \d+:\d+:\d+ [aA-zZ]* |\d+/\d+/\d+, \d+:\d+\d+ [aA-zZ]* - '
 
     messages = re.split(pattern,data)[1:]
     dates = re.findall(pattern,data)
 
     df = pd.DataFrame({'user_message': messages,'message_date': dates})
 
-    # SAMSUNG Export time format
+# SAMSUNG Export time format
 
     try:
         df['message_date'] = pd.to_datetime(df['message_date'], format="%Y/%m/%d, %I:%M %p - ")
@@ -24,8 +28,7 @@ def preprocessor(data):
 
         try:
             # Drop date enclosures from date column
-            df['message_date'] = df['message_date'].map(lambda x: x.lstrip('[').rstrip(']'))
-            df['message_date'] = pd.to_datetime(df['message_date'], format="%d/%m/%y, %I:%M:%S %p - ")
+            df['message_date'] = pd.to_datetime(df['message_date'], format="%d/%m/%y, %I:%M:%S %p ")
         except Exception as diag:
             print(diag)
 
